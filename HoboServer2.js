@@ -1,4 +1,5 @@
 //imported libraries
+var prompt = require('prompt');
 var http = require('http');
 var nunjucks = require('nunjucks');
 var mysql = require('mysql');
@@ -13,12 +14,54 @@ fileTypes = audioFileTypes + imageFileTypes;
 //Load pages
 var pages = [];
 
+//If db config file exists, load it, otherwise create it
+config_file='./config.json';
+db_info='';
+fs.exists(config_file, function(exists){
+    if (exists){
+        db_info=JSON.parse(fs.readFileSync(config_file, 'UTF-8'));
+    }
+    else 
+    {   //prompt definitions
+        var properties = [
+          {
+            name: 'username', 
+            validator: /^[a-zA-Z\s\-]+$/,
+            warning: 'Username must be only letters, spaces, or dashes'
+          },
+          {
+            name: 'database_name',
+          },
+          {
+            name: 'password',
+            hidden: true
+          }
+        ];
+
+        prompt.start();
+        prompt.get(properties, function (err, result) {
+            if (err) { return onErr(err); }
+            //input success
+            db_info=result;
+            //save to config file
+            fs.writeFile(config_file, JSON.stringify(result, null, 4), function(err){
+                if(err) console.log(err);
+                else console.log("config file created and saved to "+config_file);
+            });
+        });
+        function on_err(err) {
+          console.log(err);
+          return 1;
+        }
+    }
+});
+
 //Establish db connection
 var hoboDB = mysql.createConnection({
 	host:'localhost',
-	user: process.env.DB_USER,
-	password: process.env.DB_PASS,
-	database: process.env.DB_NAME
+	user: db_info.username,
+	password: db_info.password.env.DB_PASS,
+	database: db_info.database_name
 });
 hoboDB.connect();
 

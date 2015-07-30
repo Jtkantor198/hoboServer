@@ -16,9 +16,9 @@ var pages = [];
 //Establish db connection
 var hoboDB = mysql.createConnection({
 	host:'localhost',
-	user:'renu',
-	password:'Raspberryp1',
-	database:'HoboDB'
+	user: process.env.DB_USER,
+	password: process.env.DB_PASS,
+	database: process.env.DB_NAME
 });
 hoboDB.connect();
 
